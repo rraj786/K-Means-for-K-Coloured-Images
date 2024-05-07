@@ -4,10 +4,12 @@
     Author: Rohit Rajagopal
 '''
 
+
 import numpy as np
 import pandas as pd
 import random
 from PIL import Image
+import argparse
 
 
 def SelectKRandomPoints(array, k):
@@ -187,20 +189,37 @@ def CreateKColourImage(clusters, means):
 
 
 if __name__ == "__main__":
+    
+    # User inputs
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--imgpath', type=str, default='eiffel.jpeg', help='Path to image for processing')
+    parser.add_argument('--colours', type=int, default=3, help='Number of colours to represent image')
+    parser.add_argument('--iterations', type=int, default=30, help='Number of iterations for updating clusters')
+    parser.add_argument('--show', type=bool, default=True, help='Show original and processed images')
+    parser.add_argument('--savepath', type=str, default='eiffel_processed.jpeg', help='Path to save processed image')
+    args = parser.parse_args()
 
-    # Enter inputs
+    # Initialise image
     tol = 1e-7
-    img = Image.open("clocktower.jpg")
-    img.show()
-    k = 1
+    img = Image.open(args.imgpath)
     array = np.asarray(img)
-    iterations = 30
 
     # Call functions
-    points = SelectKRandomPoints(array, k)
+    points = SelectKRandomPoints(array, args.colours)
     pixels = GetRGBValuesForPoints(array, points)
-    clusters, means = KMeansRGB(array, pixels, iterations)   
+    clusters, means = KMeansRGB(array, pixels, args.iterations)   
     array = CreateKColourImage(clusters, means)
 
     k_img = Image.fromarray(array, "RGB")
-    k_img.show()
+
+    # Show images
+    if args.show:
+        dst = Image.new('RGB', (img.width + k_img.width, img.height))
+        dst.paste(img, (0, 0))
+        dst.paste(k_img, (img.width + 128, 0))
+
+        dst.show()
+
+    # Save processed image
+    k_img.save(args.savepath)
+    
