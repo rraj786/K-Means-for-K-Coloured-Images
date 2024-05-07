@@ -46,6 +46,7 @@ def GetRGBValuesForPoints(array, points):
     """
 
     pixels = array[points[0][0], points[0][1]]
+    k = len(pixels)
 
     # Array slicing to extract RGB values
     for i in range(1, len(points)):
@@ -211,12 +212,12 @@ if __name__ == "__main__":
     array = CreateKColourImage(clusters, means)
 
     k_img = Image.fromarray(array, "RGB")
-
+    
     # Show images
     if args.show:
-        dst = Image.new('RGB', (img.width + k_img.width, img.height))
+        dst = Image.new('RGB', (img.width + k_img.width + 32, img.height))
         dst.paste(img, (0, 0))
-        dst.paste(k_img, (img.width + 128, 0))
+        dst.paste(k_img, (img.width + 32, 0))
 
         dst.show()
 
