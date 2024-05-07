@@ -10,6 +10,7 @@ import pandas as pd
 import random
 from PIL import Image
 import argparse
+import matplotlib.pyplot as plt
 
 
 def SelectKRandomPoints(array, k):
@@ -132,7 +133,7 @@ def UpdateMeans(array, k, clusters):
     return means
 
 
-def KMeansRGB(array, means, iterations):
+def KMeansRGB(array, means, iterations, save):
 
     """
         Assign each point to a cluster and update as necessary.
@@ -140,12 +141,15 @@ def KMeansRGB(array, means, iterations):
             - array: A 3D image array
             - means: A 3D array containing the means to initialise the algorithm
             - iterations: Maximum number of iterations to update clusters
+            - save: Boolean indicating whether to save convergence plot or not
         Outputs:
             - clusters: A 2D array containing the cluster each pixel belongs to
             - new_means: A 3D array containing the updated means for each cluster and RGB layer
     """
 
     # Update means until convergence or max iterations reached
+    its = []
+    diffs = []
     for i in range(iterations):
         clusters = AssignToClusters(array, means)
         new_means = UpdateMeans(array, len(means), clusters)
@@ -156,10 +160,24 @@ def KMeansRGB(array, means, iterations):
             break
 
         # Convergence check
-        if (np.linalg.norm(means) - np.linalg.norm(new_means)) < tol:
+        diff = abs(np.linalg.norm(means) - np.linalg.norm(new_means))
+        its.append(i)
+        diffs.append(diff)
+
+        if diff < tol:
             break
 
         means = new_means
+    
+    # Plot convergence 
+    if save:
+        plt.plot(its, diffs, marker = 'x')
+
+        plt.title('Convergence of Cluster Means Against Iteration Number')
+        plt.xlabel('Iterations')
+        plt.ylabel('Difference in Means')
+
+        plt.savefig('convergence.png')
 
     return clusters, new_means
 
@@ -197,7 +215,8 @@ if __name__ == "__main__":
     parser.add_argument('--colours', type=int, default=3, help='Number of colours to represent image')
     parser.add_argument('--iterations', type=int, default=30, help='Number of iterations for updating clusters')
     parser.add_argument('--show', type=bool, default=True, help='Show original and processed images')
-    parser.add_argument('--savepath', type=str, default='eiffel_processed.jpeg', help='Path to save processed image')
+    parser.add_argument('--saveconverge', type=bool, default=True, help='Save plot of converging means')
+    parser.add_argument('--savepathimg', type=str, default='eiffel_processed.jpeg', help='Path to save processed image')
     args = parser.parse_args()
 
     # Initialise image
@@ -208,11 +227,11 @@ if __name__ == "__main__":
     # Call functions
     points = SelectKRandomPoints(array, args.colours)
     pixels = GetRGBValuesForPoints(array, points)
-    clusters, means = KMeansRGB(array, pixels, args.iterations)   
+    clusters, means = KMeansRGB(array, pixels, args.iterations, args.saveconverge)   
     array = CreateKColourImage(clusters, means)
 
     k_img = Image.fromarray(array, "RGB")
-    
+
     # Show images
     if args.show:
         dst = Image.new('RGB', (img.width + k_img.width + 32, img.height))
@@ -222,5 +241,5 @@ if __name__ == "__main__":
         dst.show()
 
     # Save processed image
-    k_img.save(args.savepath)
+    k_img.save(args.savepathimg)
     
