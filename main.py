@@ -12,6 +12,15 @@ from PIL import Image
 
 def SelectKRandomPoints(array, k):
 
+    """
+        Randomly sample k coordinates based on input dataset.
+        Inputs:
+            - array: A 3D image array
+            - k: Number of points to sample
+        Outputs:
+            - coords: A 2D array of randomly selected pixel coordinates
+    """
+
     # Find size of input array
     rows, cols = len(array), len(array[0])
 
@@ -25,6 +34,15 @@ def SelectKRandomPoints(array, k):
 
 def GetRGBValuesForPoints(array, points):
 
+    """
+        Extract RGB pixel values for a defined list of image coordinates.
+        Inputs:
+            - array: A 3D image array
+            - points: A 2D array of image coordinates
+        Outputs:
+            - rgb_vals: A 3D array of RGB pixel values
+    """
+
     pixels = array[points[0][0], points[0][1]]
 
     # Array slicing to extract RGB values
@@ -37,7 +55,16 @@ def GetRGBValuesForPoints(array, points):
 
 
 def SquaredDistance(vec1, vec2):
-     
+
+    """
+        Determines the distance between two points in 3D space.
+        Inputs:
+            - vec1: A single RGB point
+            - vec2: Another RGB point
+        Outputs:
+            - dist: Distance between the two RGB points
+    """
+        
     # Find Euclidean distance 
     dist = (vec1[0] - vec2[0])**2 + (vec1[1] - vec2[1])**2 + (vec1[2] - vec2[2])**2
 
@@ -46,6 +73,15 @@ def SquaredDistance(vec1, vec2):
 
 def AssignToClusters(array, pixels):
     
+    """
+        Group each pixel in an image to a designated cluster based on the mean it is closest to.
+        Inputs:
+            - array: A 3D image array
+            - pixels: A 3D array of pixel values for each of the means
+        Outputs:
+            - clusters: A 2D array containing the cluster each pixel belongs to
+    """
+
     clusters = np.ones([len(array), len(array[0])])
 
     # Iterate through each of the array points to find closest cluster
@@ -68,6 +104,16 @@ def AssignToClusters(array, pixels):
 
 def UpdateMeans(array, k, clusters):
 
+    """
+        Determines the mean values for each cluster.
+        Inputs:
+            - array: A 3D image array
+            - k: Number of clusters
+            - clusters: A 2D array containing the cluster each pixel belongs to
+        Outputs:
+            - means: A 3D array containing the means for each cluster and RGB layer
+    """
+
     means = np.zeros([k, 1, 3])
 
     # Extract RGB values for each cluster
@@ -84,6 +130,17 @@ def UpdateMeans(array, k, clusters):
 
 
 def KMeansRGB(array, means, iterations):
+
+    """
+        Assign each point to a cluster and update as necessary.
+        Inputs:
+            - array: A 3D image array
+            - means: A 3D array containing the means to initialise the algorithm
+            - iterations: Maximum number of iterations to update clusters
+        Outputs:
+            - clusters: A 2D array containing the cluster each pixel belongs to
+            - new_means: A 3D array containing the updated means for each cluster and RGB layer
+    """
 
     # Update means until convergence or max iterations reached
     for i in range(iterations):
@@ -105,6 +162,15 @@ def KMeansRGB(array, means, iterations):
 
 
 def CreateKColourImage(clusters, means):
+
+    """
+        Create a k-colour image given its clusters.
+        Inputs:
+            - clusters: A 2D array containing the cluster each pixel belongs to
+            - means: A 3D array containing the updated means for each cluster and RGB layer
+        Outputs:
+            - proc_image: A processed 3D image array
+    """
     
     array = np.zeros([len(clusters), len(clusters[0]), 3])
 
